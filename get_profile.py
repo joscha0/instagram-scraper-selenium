@@ -30,7 +30,7 @@ def save_img(input_url: str,  output_path: str, denoise: bool = True):
 
     if (denoise):
         img = cv2.imread(output_path)
-        dst = cv2.fastNlMeansDenoisingColored(img, None, 10, 0, 7, 21)
+        dst = cv2.fastNlMeansDenoisingColored(img, None, 8, 0, 7, 21)
         cv2.imwrite(output_path, dst)
 
 
@@ -82,5 +82,7 @@ def get_profile_img_url() -> str:
 driver.get(url)
 
 save_posts()
+
+save_img(get_profile_img_url(), 'data/profile.jpg')
 
 driver.close()
