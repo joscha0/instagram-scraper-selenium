@@ -9,7 +9,7 @@ import cv2
 
 chrome_options = Options()
 chrome_options.add_argument("--user-data-dir=chrome-data")
-chrome_options.add_argument("--headless")
+# chrome_options.add_argument("--headless")
 chrome_options.add_argument("window-size=1920,1080")
 
 
@@ -35,7 +35,7 @@ def save_img(input_url: str,  output_path: str, denoise: bool = True):
         cv2.imwrite(output_path, dst)
 
 
-def get_post_urls() -> list:
+def get_post_image_urls() -> list:
     """Returns a list of post image urls from a profile
 
     Returns:
@@ -69,8 +69,8 @@ def get_post_urls() -> list:
     return image_urls
 
 
-def save_posts():
-    image_urls = get_post_urls()
+def save_images():
+    image_urls = get_post_image_urls()
 
     for idx, image_url in enumerate(image_urls):
         print(f"saving image: ({idx}/{len(image_urls)})", end='\r')
@@ -84,20 +84,33 @@ def get_profile_img_url() -> str:
 
 def get_post_links() -> list:
     post_links = []
-    links = driver.find_elements_by_tag_name('a')
-    for link in links:
-        post = link.get_attribute('href')
-        if '/p/' in post:
-            post_links.append(post)
+    last_height = driver.execute_script("return document.body.clientHeight")
+    while True:
+        time.sleep(1)
+        links = driver.find_elements_by_tag_name('a')
+        for link in links:
+            post = link.get_attribute('href')
+            if 'instagram.com/p/' in post:
+                if post not in post_links:
+                    post_links.append(post)
+        driver.execute_script(
+            "window.scrollTo(0, document.body.clientHeight);")
+
+        new_height = driver.execute_script("return document.body.clientHeight")
+        # check if reached scroll limit
+        if new_height == last_height:
+            break
+
+        last_height = new_height
     return post_links
 
 
 driver.get(url)
 
-save_posts()
+# save_images()
 
 # save_img(get_profile_img_url(), 'data/profile.jpg')
 
-# print(get_post_links())
+print(get_post_links())
 
 driver.close()
